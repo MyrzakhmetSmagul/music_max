@@ -3,6 +3,7 @@ package musicmax
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -12,11 +13,11 @@ type Server struct {
 
 func (s *Server) Run(handler http.Handler) error {
 	s.httpServer = &http.Server{
-		Addr:           ":3003",
+		Addr:           os.Getenv("HTTP_PORT"),
 		Handler:        handler,
 		MaxHeaderBytes: 1 << 20,
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
+		ReadTimeout:    time.Duration(GetIntEnv("HTTP_READ_TIMEOUT", 10)) * time.Second,
+		WriteTimeout:   time.Duration(GetIntEnv("HTTP_WRITE_TIMEOUT", 10)) * time.Second,
 	}
 
 	return s.httpServer.ListenAndServe()
