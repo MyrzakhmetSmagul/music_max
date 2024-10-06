@@ -16,3 +16,6 @@ ALTER TABLE "lyrics"
 ADD CONSTRAINT "fk_songs_by_id"
 FOREIGN KEY ("song_id") REFERENCES "songs"("id")
 ON DELETE CASCADE;
+
+ALTER TABLE "lyrics"
+ADD CONSTRAINT "unique_song_id" UNIQUE("song_id");

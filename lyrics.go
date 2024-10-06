@@ -6,6 +6,8 @@ type Lyrics struct {
 	Id     string `json:"-"`
 	Text   string `json:"text"`
 	SongId string `json:"-"`
+	Song   string `json:"-"`
+	Group  string `json:"-"`
 }
 
 type LyricsResponse struct {

@@ -49,7 +49,7 @@ func (l *LyricsService) GetLyrics(songReq *musicmax.SongRequest) (*musicmax.Lyri
 		case http.StatusBadRequest:
 			return nil, musicmax.ErrBadRequest
 		default:
-			err := fmt.Errorf("status code: %d\nerror: %w", resp.StatusCode, musicmax.ErrBadRequest)
+			err := fmt.Errorf("status code: %d\nerror: %w", resp.StatusCode, musicmax.ErrInternalServerError)
 			return nil, err
 		}
 	}

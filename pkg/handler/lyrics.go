@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -20,15 +21,19 @@ func (h *Handler) getLyrics(w http.ResponseWriter, r *http.Request) {
 
 	slog.Debug("getLyrics", slog.Any("page", page), slog.Any("limit", limit), slog.Any("id", id))
 
-	songs, err := h.service.GetSongs(nil, page, limit)
-	if err != nil {
+	lyrics, err := h.service.GetLyrics(id, page, limit)
+	if err != nil && !errors.Is(err, musicmax.ErrBadRequest) {
 		musicmax.DefaultResponse(w, http.StatusInternalServerError)
-		slog.Error("error during convertation \"page\" value to int", slog.String("page", r.URL.Query().Get("page")), slog.Any("error", err))
+		slog.Error("error get lyrics", slog.Any("error", err))
+		return
+	} else if errors.Is(err, musicmax.ErrBadRequest) {
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
+		slog.Warn("error get lyrics", slog.Any("error", err))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	json.NewEncoder(w).Encode(songs)
+	json.NewEncoder(w).Encode(lyrics)
 }

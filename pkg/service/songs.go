@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"log/slog"
+	"strings"
 
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
 	"github.com/MyrzakhmetSmagul/music_max/pkg/repository"
@@ -78,8 +79,25 @@ func (s *SongService) CreateSong(songReq *musicmax.SongRequest) error {
 	return nil
 }
 
-func (s *SongService) GetLyrics(song *musicmax.Song) error {
-	return nil
+func (s *SongService) GetLyrics(id string, page, limit int) (*musicmax.LyricsResponse, error) {
+	lyrics, err := s.repo.GetLyrics(id)
+	if err != nil {
+		err = fmt.Errorf("SongService.DeleteSong error deleting song from repo:\n%w", err)
+		return nil, err
+	}
+
+	temp := strings.Split(lyrics.Text, "\n\n")
+	lyricsResp := new(musicmax.LyricsResponse)
+	lyricsResp.Group = lyrics.Group
+	lyricsResp.Song = lyrics.Song
+	lyricsResp.Page = page
+	lyricsResp.Limit = limit
+	verses := make([]string, 0)
+	for i := (page - 1) * limit; i < len(temp) && i-(page-1)*limit < limit; i++ {
+		verses = append(verses, temp[i])
+	}
+	lyricsResp.Text = verses
+	return lyricsResp, nil
 }
 
 func (s *SongService) DeleteSong(id string) error {

@@ -128,7 +128,7 @@ func (s *SongRepository) CreateSong(song *musicmax.Song) error {
 }
 
 func (s *SongRepository) DeleteSong(id string) error {
-	slog.Debug("id", slog.Any("id", id))
+	slog.Debug("SongRepository.DeleteSong id", slog.Any("id", id))
 	_, err := strconv.Atoi(id)
 	if err != nil {
 		err := fmt.Errorf("%w:\n%w", musicmax.ErrBadRequest, err)
