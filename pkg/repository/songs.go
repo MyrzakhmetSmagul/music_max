@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"strconv"
 	"strings"
+	"time"
 
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
 	_ "github.com/lib/pq"
@@ -22,7 +23,7 @@ func NewRepository(db *sql.DB) Repository {
 }
 
 func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int) ([]musicmax.Song, error) {
-	query := "SELECT \"id\", \"song\", \"group\", \"release_date\" FROM \"songs\""
+	query := "SELECT \"id\", \"song\", \"group\", \"release_date\", COALESCE(\"link\",'') FROM \"songs\""
 	args := []interface{}{}
 	conditions := []string{}
 	counter := 1
@@ -35,6 +36,50 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	if song, ok := filters["song"]; ok && song != "" {
 		conditions = append(conditions, fmt.Sprintf("\"song\" ILIKE $%d", counter))
 		args = append(args, song)
+		counter++
+	}
+
+	if start, ok := filters["startDate"]; ok && start != "" {
+		startDate, err := time.Parse("02.01.2006", start)
+		if err != nil {
+			err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, musicmax.ErrBadRequest)
+			return nil, err
+		}
+		between := false
+		var endDate time.Time
+		if end, ok := filters["endDate"]; ok && end != "" {
+			between = true
+			endDate, err = time.Parse("02.01.2006", end)
+			if err != nil {
+				err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, musicmax.ErrBadRequest)
+				return nil, err
+			}
+		}
+		if between {
+			conditions = append(conditions, fmt.Sprintf("\"release_date\" BETWEEN $%d AND $%d", counter, counter+1))
+			args = append(args, startDate, endDate)
+			counter += 2
+		} else {
+			conditions = append(conditions, fmt.Sprintf("\"release_date\" >= %d", counter))
+			args = append(args, startDate)
+			counter++
+		}
+
+	} else if end, ok := filters["endDate"]; ok && end != "" {
+		endDate, err := time.Parse("02.01.2006", end)
+		if err != nil {
+			err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, musicmax.ErrBadRequest)
+			return nil, err
+		}
+
+		conditions = append(conditions, fmt.Sprintf("\"release_date\" <= $%d", counter))
+		args = append(args, endDate)
+		counter++
+	}
+
+	if group, ok := filters["link"]; ok && group != "" {
+		conditions = append(conditions, fmt.Sprintf("\"group\" = $%d", counter))
+		args = append(args, group)
 		counter++
 	}
 
@@ -55,7 +100,7 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	songs := make([]musicmax.Song, 0)
 	for rows.Next() {
 		song := new(musicmax.Song)
-		err = rows.Scan(&song.Id, &song.Name, &song.Group, &song.Release)
+		err = rows.Scan(&song.Id, &song.Name, &song.Group, &song.Release, &song.Link)
 		if err != nil {
 			err = fmt.Errorf("repository.GetAllSongs error during scanning row: %w", err)
 			return nil, err
@@ -70,8 +115,8 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 }
 
 func (s *SongRepository) CreateSong(song *musicmax.Song) error {
-	query := `insert into "songs"("song", "group", "release_date") VALUES ($1, $2, $3) returning "id";`
-	res := s.db.QueryRow(query, song.Name, song.Group, song.Release)
+	query := `insert into "songs"("song", "group", "release_date", "link") VALUES ($1, $2, $3, $4) returning "id";`
+	res := s.db.QueryRow(query, song.Name, song.Group, song.Release, song.Link)
 	err := res.Scan(&song.Id)
 	if err != nil {
 		err = fmt.Errorf("songs.CreateSong postgres exec error: %w", err)

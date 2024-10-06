@@ -12,5 +12,5 @@ type Song interface {
 }
 
 type Lyrics interface {
-	GetLyrics(songReq *musicmax.SongRequest) (*musicmax.Song, error)
+	GetLyrics(songReq *musicmax.SongRequest) (*musicmax.LyricsAPIResponse, error)
 }

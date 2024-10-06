@@ -2,7 +2,8 @@ CREATE TABLE "songs" (
     "id" SERIAL PRIMARY KEY,
     "song" VARCHAR(255) NOT NULL,
     "group" VARCHAR(255) NOT NULL,
-    "release_date" DATE
+    "release_date" DATE,
+    "link" TEXT
 );
 
 CREATE TABLE "lyrics" (

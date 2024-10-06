@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -31,7 +30,7 @@ func (h *Handler) getSongs(w http.ResponseWriter, r *http.Request) {
 	filters, err := musicmax.GetQueryParams(r)
 	if err != nil {
 		musicmax.DefaultResponse(w, http.StatusBadRequest)
-		slog.Error("error during get filters", slog.Any("error", err))
+		slog.Warn("error during get filters", slog.Any("error", err))
 		return
 	}
 
@@ -50,27 +49,31 @@ func (h *Handler) getSongs(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) createSong(w http.ResponseWriter, r *http.Request) {
 	slog.Info("POST api/v1/songs")
-	body, err := io.ReadAll(r.Body)
+
+	songReq := new(musicmax.SongRequest)
+	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(songReq)
 	if err != nil {
-		slog.Error("handler.createSong error during read from body", slog.Any("err", err))
+		slog.Error("handler.createSong error decoding from body", slog.Any("err", err))
 		musicmax.DefaultResponse(w, http.StatusInternalServerError)
 		return
 	}
-	defer r.Body.Close()
 
-	songReq := new(musicmax.SongRequest)
-	json.Unmarshal(body, songReq)
 	slog.Debug("song request", slog.Any("songReq", songReq))
 	if strings.TrimSpace(songReq.Group) == "" || strings.TrimSpace(songReq.Name) == "" {
-		slog.Error("bad request")
+		slog.Warn("bad request")
 		musicmax.DefaultResponse(w, http.StatusBadRequest)
 		return
 	}
 
 	err = h.service.CreateSong(songReq)
-	if err != nil {
-		slog.Error("handler.createSong error during creating song", slog.Any("err", err))
+	if err != nil && !errors.Is(err, musicmax.ErrBadRequest) {
+		slog.Error("handler.createSong error creating song", slog.Any("err", err))
 		musicmax.DefaultResponse(w, http.StatusInternalServerError)
+		return
+	} else if errors.Is(err, musicmax.ErrBadRequest) {
+		slog.Warn("handler.createSong bad request", slog.Any("err", err))
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
 		return
 	}
 

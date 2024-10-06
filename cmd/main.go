@@ -18,9 +18,18 @@ import (
 )
 
 func main() {
-	options := &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+	mode := os.Getenv("MODE")
+	options := new(slog.HandlerOptions)
+
+	switch mode {
+	case "PROD":
+		options.Level = slog.LevelWarn
+	case "DEV":
+		options.Level = slog.LevelInfo
+	default:
+		options.Level = slog.LevelDebug
 	}
+
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, options))
 	slog.SetDefault(logger)
 
@@ -45,7 +54,8 @@ func main() {
 	}
 
 	repo := repository.NewRepository(db)
-	service := service.NewSongService(repo)
+	lyricsService := service.NewLyricsService()
+	service := service.NewSongService(repo, lyricsService)
 	handler := handler.NewHandler(service)
 	srv := new(musicmax.Server)
 

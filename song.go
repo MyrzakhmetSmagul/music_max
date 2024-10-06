@@ -7,6 +7,7 @@ type Song struct {
 	Group   string     `json:"group"`
 	Name    string     `json:"song"`
 	Release *time.Time `json:"releaseDate,omitempty"`
+	Link    string     `json:"link,omitempty"`
 	Lyrics  *Lyrics    `json:"-"`
 }
 
@@ -20,6 +21,7 @@ type SongResponse struct {
 	Group   string     `json:"group"`
 	Name    string     `json:"song"`
 	Release *time.Time `json:"releaseDate,omitempty"`
+	Link    string     `json:"link,omitempty"`
 }
 
 type SongsResponse struct {

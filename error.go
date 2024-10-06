@@ -10,7 +10,8 @@ type Description struct {
 	Description string `json:"description"`
 }
 
-var ErrBadRequest = errors.New("Bad request")
+var ErrBadRequest = errors.New("bad request")
+var ErrInternalServerError = errors.New("internal server error")
 
 func DefaultResponse(w http.ResponseWriter, statusCode int) {
 	errResp := Description{
