@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"strconv"
 	"strings"
 
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
@@ -77,6 +78,23 @@ func (s *SongRepository) CreateSong(song *musicmax.Song) error {
 		return err
 	}
 	slog.Debug("db create song", slog.Any("song id", song.Id))
+
+	return nil
+}
+
+func (s *SongRepository) DeleteSong(id string) error {
+	slog.Debug("id", slog.Any("id", id))
+	_, err := strconv.Atoi(id)
+	if err != nil {
+		err := fmt.Errorf("%w:\n%w", musicmax.ErrBadRequest, err)
+		return err
+	}
+	query := `DELETE FROM songs WHERE "id" = $1`
+	_, err = s.db.Exec(query, id)
+	if err != nil {
+		err = fmt.Errorf("SongRepository.DeleteSong error executing query: %w", err)
+		return err
+	}
 
 	return nil
 }

@@ -63,3 +63,12 @@ func (s *SongService) CreateSong(songReq *musicmax.SongRequest) error {
 func (s *SongService) GetLyrics(song *musicmax.Song) error {
 	return nil
 }
+
+func (s *SongService) DeleteSong(id string) error {
+	err := s.repo.DeleteSong(id)
+	if err != nil {
+		err = fmt.Errorf("SongService.DeleteSong error deleting song from repo:\n%w", err)
+		return err
+	}
+	return nil
+}

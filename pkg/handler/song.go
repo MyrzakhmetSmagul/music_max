@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
@@ -70,6 +71,25 @@ func (h *Handler) createSong(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error("handler.createSong error during creating song", slog.Any("err", err))
 		musicmax.DefaultResponse(w, http.StatusInternalServerError)
+		return
+	}
+
+	musicmax.DefaultResponse(w, http.StatusOK)
+}
+
+func (h *Handler) deleteSong(w http.ResponseWriter, r *http.Request) {
+	slog.Info("DELETE /api/v1/songs/{id}")
+	id := r.PathValue("id")
+	err := h.service.DeleteSong(id)
+	if err != nil && !errors.Is(err, musicmax.ErrBadRequest) {
+		slog.Error("Handler.deleteSong error", slog.Any("error", err))
+		musicmax.DefaultResponse(w, http.StatusInternalServerError)
+		return
+	}
+
+	if errors.Is(err, musicmax.ErrBadRequest) {
+		slog.Warn("Handler.deleteSong bad request", slog.Any("error", err))
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
 		return
 	}
 

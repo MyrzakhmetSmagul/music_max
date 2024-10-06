@@ -8,6 +8,7 @@ type Song interface {
 	GetSongs(filters map[string]string, page int, limit int) (*musicmax.SongsResponse, error)
 	CreateSong(songReq *musicmax.SongRequest) error
 	GetLyrics(song *musicmax.Song) error
+	DeleteSong(id string) error
 }
 
 type Lyrics interface {
