@@ -22,8 +22,12 @@ func NewRepository(db *sql.DB) Repository {
 	}
 }
 
+func (s *SongRepository) BeginTx() (*sql.Tx, error) {
+	return s.db.Begin()
+}
+
 func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int) ([]musicmax.Song, error) {
-	query := "SELECT \"id\", \"song\", \"group\", \"release_date\", COALESCE(\"link\",'') FROM \"songs\""
+	query := `SELECT "id", "song", "group", "release_date", COALESCE("link",'') FROM "songs"`
 	args := []interface{}{}
 	conditions := []string{}
 	counter := 1
@@ -114,11 +118,12 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	return songs, nil
 }
 
-func (s *SongRepository) CreateSong(song *musicmax.Song) error {
-	query := `insert into "songs"("song", "group", "release_date", "link") VALUES ($1, $2, $3, $4) returning "id";`
-	res := s.db.QueryRow(query, song.Name, song.Group, song.Release, song.Link)
+func (s *SongRepository) CreateSong(tx *sql.Tx, song *musicmax.Song) error {
+	query := `INSERT INTO "songs"("song", "group", "release_date", "link") VALUES ($1, $2, $3, $4) RETURNING "id";`
+	res := tx.QueryRow(query, song.Name, song.Group, song.Release, song.Link)
 	err := res.Scan(&song.Id)
 	if err != nil {
+		tx.Rollback()
 		err = fmt.Errorf("songs.CreateSong postgres exec error: %w", err)
 		return err
 	}
@@ -134,10 +139,67 @@ func (s *SongRepository) DeleteSong(id string) error {
 		err := fmt.Errorf("%w:\n%w", musicmax.ErrBadRequest, err)
 		return err
 	}
+
 	query := `DELETE FROM songs WHERE "id" = $1`
 	_, err = s.db.Exec(query, id)
 	if err != nil {
 		err = fmt.Errorf("SongRepository.DeleteSong error executing query: %w", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *SongRepository) UpdateSong(tx *sql.Tx, song *musicmax.Song) error {
+	slog.Debug("SongRepository.UpdateSong id", slog.Any("id", song.Id))
+	_, err := strconv.Atoi(song.Id)
+	if err != nil {
+		err := fmt.Errorf("%w:\n%w", musicmax.ErrBadRequest, err)
+		return err
+	}
+
+	if strings.TrimSpace(song.Name) == "" &&
+		strings.TrimSpace(song.Group) == "" &&
+		strings.TrimSpace(song.Link) == "" &&
+		song.Release == nil {
+		return fmt.Errorf("SongRepository.UpdateSong empty input: %w", musicmax.ErrBadRequest)
+	}
+
+	args := []interface{}{}
+	conditions := []string{}
+	counter := 1
+	query := `UPDATE "songs" SET `
+	if strings.TrimSpace(song.Name) != "" {
+		conditions = append(conditions, fmt.Sprintf("song= $%d", counter))
+		args = append(args, strings.TrimSpace(song.Name))
+		counter++
+	}
+
+	if strings.TrimSpace(song.Group) != "" {
+		conditions = append(conditions, fmt.Sprintf("group= $%d", counter))
+		args = append(args, strings.TrimSpace(song.Group))
+		counter++
+	}
+
+	if strings.TrimSpace(song.Link) != "" {
+		conditions = append(conditions, fmt.Sprintf("link= $%d", counter))
+		args = append(args, strings.TrimSpace(song.Link))
+		counter++
+	}
+	if song.Release != nil {
+		conditions = append(conditions, fmt.Sprintf("release_date= $%d", counter))
+		args = append(args, song.Release)
+		counter++
+	}
+
+	query += strings.Join(conditions, ", ")
+	query = fmt.Sprintf("%s WHERE \"id\"=$%d", query, counter)
+	args = append(args, song.Id)
+
+	_, err = tx.Exec(query, args...)
+	if err != nil {
+		tx.Rollback()
+		err = fmt.Errorf("SongRepository.UpdateSong error executing query: %w", err)
 		return err
 	}
 

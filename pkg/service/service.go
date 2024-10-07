@@ -9,6 +9,7 @@ type Song interface {
 	CreateSong(songReq *musicmax.SongRequest) error
 	GetLyrics(id string, page int, limit int) (*musicmax.LyricsResponse, error)
 	DeleteSong(id string) error
+	UpdateSong(id string, song *musicmax.SongPatchRequest) error
 }
 
 type Lyrics interface {

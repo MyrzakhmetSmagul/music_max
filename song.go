@@ -16,6 +16,14 @@ type SongRequest struct {
 	Name  string `json:"song"`
 }
 
+type SongPatchRequest struct {
+	Group   *string    `json:"group"`
+	Name    *string    `json:"song"`
+	Release *time.Time `json:"releaseDate"`
+	Text    *string    `json:"text"`
+	Link    *string    `json:"link"`
+}
+
 type SongResponse struct {
 	Id      string     `json:"id"`
 	Group   string     `json:"group"`

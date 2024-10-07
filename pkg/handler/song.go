@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -54,8 +55,8 @@ func (h *Handler) createSong(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(songReq)
 	if err != nil {
-		slog.Error("handler.createSong error decoding from body", slog.Any("err", err))
-		musicmax.DefaultResponse(w, http.StatusInternalServerError)
+		slog.Warn("handler.createSong error decoding from body", slog.Any("err", err))
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
 		return
 	}
 
@@ -92,6 +93,42 @@ func (h *Handler) deleteSong(w http.ResponseWriter, r *http.Request) {
 
 	if errors.Is(err, musicmax.ErrBadRequest) {
 		slog.Warn("Handler.deleteSong bad request", slog.Any("error", err))
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
+		return
+	}
+
+	musicmax.DefaultResponse(w, http.StatusOK)
+}
+
+func (h *Handler) updateSong(w http.ResponseWriter, r *http.Request) {
+	slog.Info("PUT /api/v1/songs/{id}")
+	id := r.PathValue("id")
+	songReq := new(musicmax.SongPatchRequest)
+	defer r.Body.Close()
+	err := json.NewDecoder(r.Body).Decode(songReq)
+	if err != nil {
+		slog.Warn("handler.createSong error decoding from body", slog.Any("err", err))
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
+		return
+	}
+	slog.Debug("song body", slog.Any("body", songReq))
+
+	if songReq.Name == nil &&
+		songReq.Group == nil &&
+		songReq.Release == nil &&
+		songReq.Link == nil &&
+		songReq.Text == nil {
+		musicmax.DefaultResponse(w, http.StatusBadRequest)
+		return
+	}
+
+	err = h.service.UpdateSong(id, songReq)
+	if err != nil && !errors.Is(err, musicmax.ErrBadRequest) && !errors.Is(err, sql.ErrNoRows) {
+		slog.Error("handler.createSong error update song", slog.Any("err", err))
+		musicmax.DefaultResponse(w, http.StatusInternalServerError)
+		return
+	} else if errors.Is(err, musicmax.ErrBadRequest) || errors.Is(err, sql.ErrNoRows) {
+		slog.Warn("handler.createSong error update song", slog.Any("err", err))
 		musicmax.DefaultResponse(w, http.StatusBadRequest)
 		return
 	}

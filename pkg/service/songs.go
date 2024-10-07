@@ -38,6 +38,7 @@ func (s *SongService) GetSongs(filters map[string]string, page int, limit int) (
 		song.Group = v.Group
 		song.Name = v.Name
 		song.Release = v.Release
+		song.Link = v.Link
 		songs[i] = *song
 	}
 	resp := new(musicmax.SongsResponse)
@@ -55,6 +56,7 @@ func (s *SongService) CreateSong(songReq *musicmax.SongRequest) error {
 		err = fmt.Errorf("SongService.CreateSong error get lyrics:\n%w", err)
 		return err
 	}
+
 	song := &musicmax.Song{
 		Group:   songReq.Group,
 		Name:    songReq.Name,
@@ -62,7 +64,13 @@ func (s *SongService) CreateSong(songReq *musicmax.SongRequest) error {
 		Link:    lyricsResp.Link,
 	}
 
-	err = s.repo.CreateSong(song)
+	tx, err := s.repo.BeginTx()
+	if err != nil {
+		err = fmt.Errorf("SongService.CreateSong error begin tx:\n%w", err)
+		return err
+	}
+
+	err = s.repo.CreateSong(tx, song)
 	if err != nil {
 		err = fmt.Errorf("service.CreateSong error creating songs in repository: %w", err)
 		return err
@@ -71,12 +79,13 @@ func (s *SongService) CreateSong(songReq *musicmax.SongRequest) error {
 	lyrics := new(musicmax.Lyrics)
 	lyrics.Text = lyricsResp.Text
 	lyrics.SongId = song.Id
-	err = s.repo.CreateLyrics(lyrics)
+	err = s.repo.CreateLyrics(tx, lyrics)
 	if err != nil {
 		err = fmt.Errorf("service.CreateSong error creating lyrics in repository: %w", err)
 		return err
 	}
-	return nil
+
+	return tx.Commit()
 }
 
 func (s *SongService) GetLyrics(id string, page, limit int) (*musicmax.LyricsResponse, error) {
@@ -106,5 +115,67 @@ func (s *SongService) DeleteSong(id string) error {
 		err = fmt.Errorf("SongService.DeleteSong error deleting song from repo:\n%w", err)
 		return err
 	}
+
 	return nil
+}
+
+func (s *SongService) UpdateSong(id string, songReq *musicmax.SongPatchRequest) error {
+	song := new(musicmax.Song)
+	song.Id = id
+	updateSong := false
+	updateText := false
+	if songReq.Name != nil && *songReq.Name != "" {
+		song.Name = *songReq.Name
+		updateSong = true
+	}
+
+	if songReq.Group != nil && *songReq.Group != "" {
+		song.Group = *songReq.Group
+		updateSong = true
+	}
+
+	if songReq.Link != nil && *songReq.Link != "" {
+		song.Link = *songReq.Link
+		updateSong = true
+	}
+
+	if songReq.Release != nil {
+		song.Release = songReq.Release
+		updateSong = true
+	}
+
+	if songReq.Text != nil {
+		song.Lyrics = new(musicmax.Lyrics)
+		song.Lyrics.SongId = id
+		song.Lyrics.Text = *songReq.Text
+		updateText = true
+	}
+
+	if !updateSong && !updateText {
+		return fmt.Errorf("SongService.UpdateSong %w", musicmax.ErrBadRequest)
+	}
+
+	tx, err := s.repo.BeginTx()
+	if err != nil {
+		err = fmt.Errorf("SongService.UpdateSong error begin tx:\n%w", err)
+		return err
+	}
+
+	if updateSong {
+		err = s.repo.UpdateSong(tx, song)
+		if err != nil {
+			err = fmt.Errorf("SongService.UpdateSong error updating song from repo:\n%w", err)
+			return err
+		}
+	}
+
+	if updateText {
+		err = s.repo.UpdateLyrics(tx, song.Id, song.Lyrics)
+		if err != nil {
+			err = fmt.Errorf("SongService.UpdateSong error updating song from repo:\n%w", err)
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
