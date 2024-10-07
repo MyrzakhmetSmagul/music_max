@@ -81,9 +81,9 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 		counter++
 	}
 
-	if group, ok := filters["link"]; ok && group != "" {
-		conditions = append(conditions, fmt.Sprintf("\"group\" = $%d", counter))
-		args = append(args, group)
+	if link, ok := filters["link"]; ok && link != "" {
+		conditions = append(conditions, fmt.Sprintf("\"link\" = $%d", counter))
+		args = append(args, link)
 		counter++
 	}
 
