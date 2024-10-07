@@ -181,7 +181,7 @@ paths:
       tags:
       - Songs
     patch:
-      description: Измененить данные песни
+      description: Изменить данные песни
       parameters:
       - description: Song ID
         in: path
@@ -209,7 +209,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/musicmax.Description'
-      summary: Измененить данные песни
+      summary: Изменить данные песни
       tags:
       - Songs
   /songs/{id}/lyrics:

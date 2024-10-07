@@ -170,14 +170,14 @@
                 }
             },
             "patch": {
-                "description": "Измененить данные песни",
+                "description": "Изменить данные песни",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Songs"
                 ],
-                "summary": "Измененить данные песни",
+                "summary": "Изменить данные песни",
                 "parameters": [
                     {
                         "type": "string",

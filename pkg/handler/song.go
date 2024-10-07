@@ -143,8 +143,8 @@ func (h *Handler) deleteSong(w http.ResponseWriter, r *http.Request) {
 
 // updateSong update song.
 //
-// @Summary Измененить данные песни
-// @Description Измененить данные песни
+// @Summary Изменить данные песни
+// @Description Изменить данные песни
 // @Tags Songs
 // @Param id path string true "Song ID"
 // @Param songInfo body musicmax.SongPatchRequest true "Тело запроса"
