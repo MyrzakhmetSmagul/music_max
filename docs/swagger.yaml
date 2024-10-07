@@ -123,11 +123,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/musicmax.Description'
-      summary: Получить песню из библиотеки
+      summary: Получить песни из библиотеки
       tags:
       - Songs
     post:
-      description: Добавить песню в библиотке
+      description: Добавить песню в библиотеку
       parameters:
       - description: Тело запроса
         in: body
@@ -150,12 +150,18 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/musicmax.Description'
-      summary: Добавить песню в библиотке
+      summary: Добавить песню в библиотеку
       tags:
       - Songs
   /songs/{id}:
     delete:
       description: Удалить песню из библиотеки по id
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -175,8 +181,13 @@ paths:
       tags:
       - Songs
     patch:
-      description: Изменение данных песни
+      description: Измененить данные песни
       parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Тело запроса
         in: body
         name: songInfo
@@ -198,7 +209,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/musicmax.Description'
-      summary: Изменения данных песни
+      summary: Измененить данные песни
       tags:
       - Songs
   /songs/{id}/lyrics:

@@ -27,7 +27,7 @@ const docTemplate = `{
                 "tags": [
                     "Songs"
                 ],
-                "summary": "Получить песню из библиотеки",
+                "summary": "Получить песни из библиотеки",
                 "parameters": [
                     {
                         "type": "string",
@@ -94,14 +94,14 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Добавить песню в библиотке",
+                "description": "Добавить песню в библиотеку",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Songs"
                 ],
-                "summary": "Добавить песню в библиотке",
+                "summary": "Добавить песню в библиотеку",
                 "parameters": [
                     {
                         "description": "Тело запроса",
@@ -145,6 +145,15 @@ const docTemplate = `{
                     "Songs"
                 ],
                 "summary": "Удалить песню из библиотеки",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Song ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -167,15 +176,22 @@ const docTemplate = `{
                 }
             },
             "patch": {
-                "description": "Изменение данных песни",
+                "description": "Измененить данные песни",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "Songs"
                 ],
-                "summary": "Изменения данных песни",
+                "summary": "Измененить данные песни",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Song ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "Тело запроса",
                         "name": "songInfo",

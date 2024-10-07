@@ -116,6 +116,7 @@ func (h *Handler) createSong(w http.ResponseWriter, r *http.Request) {
 // @Summary Удалить песню из библиотеки
 // @Description Удалить песню из библиотеки по id
 // @Tags Songs
+// @Param id path string true "Song ID"
 // @Produce  json
 // @Success 200 {object} musicmax.Description "OK"
 // @Failure 400 {object} musicmax.Description "Bad Request"
@@ -145,6 +146,7 @@ func (h *Handler) deleteSong(w http.ResponseWriter, r *http.Request) {
 // @Summary Измененить данные песни
 // @Description Измененить данные песни
 // @Tags Songs
+// @Param id path string true "Song ID"
 // @Param songInfo body musicmax.SongPatchRequest true "Тело запроса"
 // @Produce  json
 // @Success 200 {object} musicmax.Description "OK"
