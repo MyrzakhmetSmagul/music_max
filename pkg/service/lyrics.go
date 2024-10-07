@@ -1,11 +1,11 @@
 package service
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
@@ -25,19 +25,19 @@ func NewLyricsService() Lyrics {
 
 func (l *LyricsService) GetLyrics(songReq *musicmax.SongRequest) (*musicmax.LyricsAPIResponse, error) {
 	slog.Debug("LyricsService", slog.Any("address", l.address))
-	jsonData, err := json.Marshal(songReq)
-	if err != nil {
-		err := fmt.Errorf("LyricsService.GetLyrics error marshalling JSON:\n%w", err)
-		return nil, err
-	}
-	slog.Debug("request data", slog.Any("data", songReq))
-	req, err := http.NewRequest("GET", l.address, bytes.NewBuffer(jsonData))
-	if err != nil {
-		err := fmt.Errorf("LyricsService.GetLyrics error making GET request:\n%w", err)
-		return nil, err
-	}
 
-	resp, err := l.client.Do(req)
+	reqURL, err := url.Parse(l.address)
+	if err != nil {
+		err := fmt.Errorf("LyricsService.GetLyrics error parsing URL:\n%w", err)
+		return nil, err
+	}
+	params := url.Values{}
+	params.Add("group", songReq.Group)
+	params.Add("song", songReq.Name)
+
+	reqURL.RawQuery = params.Encode()
+
+	resp, err := l.client.Get(reqURL.String())
 	if err != nil {
 		err := fmt.Errorf("LyricsService.GetLyrics error occured during get request:\n%w", err)
 		return nil, err
