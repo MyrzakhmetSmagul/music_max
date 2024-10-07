@@ -1,0 +1,231 @@
+basePath: /api/v1
+definitions:
+  musicmax.Description:
+    properties:
+      description:
+        type: string
+    type: object
+  musicmax.LyricsResponse:
+    properties:
+      group:
+        type: string
+      limit:
+        type: integer
+      page:
+        type: integer
+      song:
+        type: string
+      text:
+        items:
+          type: string
+        type: array
+    type: object
+  musicmax.SongPatchRequest:
+    properties:
+      group:
+        type: string
+      link:
+        type: string
+      releaseDate:
+        type: string
+      song:
+        type: string
+      text:
+        type: string
+    type: object
+  musicmax.SongRequest:
+    properties:
+      group:
+        type: string
+      song:
+        type: string
+    type: object
+  musicmax.SongResponse:
+    properties:
+      group:
+        type: string
+      id:
+        type: string
+      link:
+        type: string
+      releaseDate:
+        type: string
+      song:
+        type: string
+    type: object
+  musicmax.SongsResponse:
+    properties:
+      limit:
+        type: integer
+      page:
+        type: integer
+      songs:
+        items:
+          $ref: '#/definitions/musicmax.SongResponse'
+        type: array
+    type: object
+host: localhost:3030
+info:
+  contact:
+    email: smagulmyrzakhmet@gmail.com
+    name: Developer
+  description: This is a sample server for music management.
+  title: Music API
+  version: "1.0"
+paths:
+  /songs:
+    get:
+      description: |-
+        Получить песни из библиотеки. Можно фильтровать по всем полям кроме id
+        структуры. Есть пагинация, если не устанавливать страницу
+        и лимит на количество песен будут использованы стандартные значения.
+      parameters:
+      - description: Номер страницы
+        in: query
+        name: page
+        type: string
+      - description: Лимит на количество элементов на одной странице
+        in: query
+        name: limit
+        type: string
+      - description: Название песни, фильтрация без учета регистра
+        in: query
+        name: song
+        type: string
+      - description: Имя исполнителя или название группы, фильтрация без учета регистра
+        in: query
+        name: group
+        type: string
+      - description: Ссылка, фильтрация с учетом регистра
+        in: query
+        name: link
+        type: string
+      - description: Дата выпуска с этой даты включительно
+        in: query
+        name: startDate
+        type: string
+      - description: Дата выпуска до этой даты включительно
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список песен с пагинацией и фильтрами
+          schema:
+            $ref: '#/definitions/musicmax.SongsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+      summary: Получить песню из библиотеки
+      tags:
+      - Songs
+    post:
+      description: Добавить песню в библиотке
+      parameters:
+      - description: Тело запроса
+        in: body
+        name: song
+        required: true
+        schema:
+          $ref: '#/definitions/musicmax.SongRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+      summary: Добавить песню в библиотке
+      tags:
+      - Songs
+  /songs/{id}:
+    delete:
+      description: Удалить песню из библиотеки по id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+      summary: Удалить песню из библиотеки
+      tags:
+      - Songs
+    patch:
+      description: Изменение данных песни
+      parameters:
+      - description: Тело запроса
+        in: body
+        name: songInfo
+        required: true
+        schema:
+          $ref: '#/definitions/musicmax.SongPatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+      summary: Изменения данных песни
+      tags:
+      - Songs
+  /songs/{id}/lyrics:
+    get:
+      description: Получить текст песни по id
+      parameters:
+      - description: Song ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Текст песни с пагинацией по куплетам
+          schema:
+            $ref: '#/definitions/musicmax.LyricsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/musicmax.Description'
+      summary: Получить текст песни
+      tags:
+      - Songs
+swagger: "2.0"

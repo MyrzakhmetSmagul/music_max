@@ -3,7 +3,9 @@ package handler
 import (
 	"net/http"
 
+	_ "github.com/MyrzakhmetSmagul/music_max/docs"
 	"github.com/MyrzakhmetSmagul/music_max/pkg/service"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Handler struct {
@@ -21,5 +23,6 @@ func (h *Handler) InitRoutes() *http.ServeMux {
 	mux.HandleFunc("POST /api/v1/songs", h.createSong)
 	mux.HandleFunc("DELETE /api/v1/songs/{id}", h.deleteSong)
 	mux.HandleFunc("PATCH /api/v1/songs/{id}", h.updateSong)
+	mux.HandleFunc("GET /swagger/", httpSwagger.WrapHandler)
 	return mux
 }

@@ -17,6 +17,16 @@ import (
 	"github.com/MyrzakhmetSmagul/music_max/pkg/service"
 )
 
+// @title Music API
+// @version 1.0
+// @description This is a sample server for music management.
+
+// @contact.name Developer
+// @contact.email smagulmyrzakhmet@gmail.com
+
+// @host localhost:3030
+// @BasePath /api/v1
+
 func main() {
 	mode := os.Getenv("MODE")
 	options := new(slog.HandlerOptions)

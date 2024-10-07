@@ -11,6 +11,25 @@ import (
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
 )
 
+// getSongs return songs.
+//
+// @Summary Получить песни из библиотеки
+// @Description Получить песни из библиотеки. Можно фильтровать по всем полям кроме id
+// @Description структуры. Есть пагинация, если не устанавливать страницу
+// @Description и лимит на количество песен будут использованы стандартные значения.
+// @Tags Songs
+// @Param page query string false "Номер страницы"
+// @Param limit query string false "Лимит на количество элементов на одной странице"
+// @Param song query string false "Название песни, фильтрация без учета регистра"
+// @Param group query string false "Имя исполнителя или название группы, фильтрация без учета регистра"
+// @Param link query string false "Ссылка, фильтрация с учетом регистра"
+// @Param startDate query string false "Дата выпуска с этой даты включительно"
+// @Param endDate query string false "Дата выпуска до этой даты включительно"
+// @Produce  json
+// @Success 200 {object} musicmax.SongsResponse "Список песен с пагинацией и фильтрами"
+// @Failure 400 {object} musicmax.Description "Bad Request"
+// @Failure 500 {object} musicmax.Description "Internal Server Error"
+// @Router /songs [get]
 func (h *Handler) getSongs(w http.ResponseWriter, r *http.Request) {
 	slog.Info("GET api/v1/songs")
 
@@ -18,7 +37,7 @@ func (h *Handler) getSongs(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		musicmax.DefaultResponse(w, http.StatusBadRequest)
-		slog.Error("error during convertation page or limit value to int",
+		slog.Warn("error during convertation page or limit value to int",
 			slog.String("page", r.URL.Query().Get("page")),
 			slog.String("limit", r.URL.Query().Get("limit")),
 			slog.Any("error", err))
@@ -48,6 +67,17 @@ func (h *Handler) getSongs(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(songs)
 }
 
+// createSong return song.
+//
+// @Summary Добавить песню в библиотеку
+// @Description Добавить песню в библиотеку
+// @Tags Songs
+// @Param song body musicmax.SongRequest true "Тело запроса"
+// @Produce  json
+// @Success 200 {object} musicmax.Description "OK"
+// @Failure 400 {object} musicmax.Description "Bad Request"
+// @Failure 500 {object} musicmax.Description "Internal Server Error"
+// @Router /songs [post]
 func (h *Handler) createSong(w http.ResponseWriter, r *http.Request) {
 	slog.Info("POST api/v1/songs")
 
@@ -81,6 +111,16 @@ func (h *Handler) createSong(w http.ResponseWriter, r *http.Request) {
 	musicmax.DefaultResponse(w, http.StatusOK)
 }
 
+// deleteSong delete song.
+//
+// @Summary Удалить песню из библиотеки
+// @Description Удалить песню из библиотеки по id
+// @Tags Songs
+// @Produce  json
+// @Success 200 {object} musicmax.Description "OK"
+// @Failure 400 {object} musicmax.Description "Bad Request"
+// @Failure 500 {object} musicmax.Description "Internal Server Error"
+// @Router /songs/{id} [delete]
 func (h *Handler) deleteSong(w http.ResponseWriter, r *http.Request) {
 	slog.Info("DELETE /api/v1/songs/{id}")
 	id := r.PathValue("id")
@@ -100,6 +140,17 @@ func (h *Handler) deleteSong(w http.ResponseWriter, r *http.Request) {
 	musicmax.DefaultResponse(w, http.StatusOK)
 }
 
+// updateSong update song.
+//
+// @Summary Измененить данные песни
+// @Description Измененить данные песни
+// @Tags Songs
+// @Param songInfo body musicmax.SongPatchRequest true "Тело запроса"
+// @Produce  json
+// @Success 200 {object} musicmax.Description "OK"
+// @Failure 400 {object} musicmax.Description "Bad Request"
+// @Failure 500 {object} musicmax.Description "Internal Server Error"
+// @Router /songs/{id} [patch]
 func (h *Handler) updateSong(w http.ResponseWriter, r *http.Request) {
 	slog.Info("PUT /api/v1/songs/{id}")
 	id := r.PathValue("id")

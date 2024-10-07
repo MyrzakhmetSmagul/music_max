@@ -9,6 +9,17 @@ import (
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
 )
 
+// getLyrics return song lyrics by id.
+//
+// @Summary Получить текст песни
+// @Description Получить текст песни по id
+// @Tags Songs
+// @Param id path string true "Song ID"
+// @Produce  json
+// @Success 200 {object} musicmax.LyricsResponse "Текст песни с пагинацией по куплетам"
+// @Failure 400 {object} musicmax.Description "Bad Request"
+// @Failure 500 {object} musicmax.Description "Internal Server Error"
+// @Router /songs/{id}/lyrics [get]
 func (h *Handler) getLyrics(w http.ResponseWriter, r *http.Request) {
 	slog.Info("GET api/v1/songs/{id}/lycirs")
 	id := r.PathValue("id")
