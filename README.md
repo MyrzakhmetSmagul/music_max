@@ -8,7 +8,7 @@ Music Max API — это серверное приложение, предост
 
 Перед запуском убедитесь, что у вас установлены:
 
-- [Go 1.20+](https://golang.org/doc/install)
+- [Go 1.22.3+](https://golang.org/doc/install)
 - [PostgreSQL](https://www.postgresql.org/download/)
 - [Docker](https://www.docker.com/products/docker-desktop) (для работы с базой данных в контейнере)
 - [Make](https://www.gnu.org/software/make/)
