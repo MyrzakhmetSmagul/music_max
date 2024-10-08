@@ -76,19 +76,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Список песен с пагинацией и фильтрами",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.SongsResponse"
+                            "$ref": "#/definitions/model.SongsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     }
                 }
@@ -109,7 +109,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/musicmax.SongRequest"
+                            "$ref": "#/definitions/model.SongRequest"
                         }
                     }
                 ],
@@ -117,19 +117,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     }
                 }
@@ -158,19 +158,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     }
                 }
@@ -198,7 +198,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/musicmax.SongPatchRequest"
+                            "$ref": "#/definitions/model.SongPatchRequest"
                         }
                     }
                 ],
@@ -206,19 +206,19 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     }
                 }
@@ -247,19 +247,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Текст песни с пагинацией по куплетам",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.LyricsResponse"
+                            "$ref": "#/definitions/model.LyricsResponse"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/musicmax.Description"
+                            "$ref": "#/definitions/model.Description"
                         }
                     }
                 }
@@ -267,7 +267,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "musicmax.Description": {
+        "model.Description": {
             "type": "object",
             "properties": {
                 "description": {
@@ -275,7 +275,7 @@ const docTemplate = `{
                 }
             }
         },
-        "musicmax.LyricsResponse": {
+        "model.LyricsResponse": {
             "type": "object",
             "properties": {
                 "group": {
@@ -298,7 +298,7 @@ const docTemplate = `{
                 }
             }
         },
-        "musicmax.SongPatchRequest": {
+        "model.SongPatchRequest": {
             "type": "object",
             "properties": {
                 "group": {
@@ -318,7 +318,7 @@ const docTemplate = `{
                 }
             }
         },
-        "musicmax.SongRequest": {
+        "model.SongRequest": {
             "type": "object",
             "properties": {
                 "group": {
@@ -329,7 +329,7 @@ const docTemplate = `{
                 }
             }
         },
-        "musicmax.SongResponse": {
+        "model.SongResponse": {
             "type": "object",
             "properties": {
                 "group": {
@@ -349,7 +349,7 @@ const docTemplate = `{
                 }
             }
         },
-        "musicmax.SongsResponse": {
+        "model.SongsResponse": {
             "type": "object",
             "properties": {
                 "limit": {
@@ -361,7 +361,7 @@ const docTemplate = `{
                 "songs": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/musicmax.SongResponse"
+                        "$ref": "#/definitions/model.SongResponse"
                     }
                 }
             }

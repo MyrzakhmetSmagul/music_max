@@ -1,4 +1,4 @@
-package musicmax
+package model
 
 import "time"
 
@@ -17,19 +17,19 @@ type SongRequest struct {
 }
 
 type SongPatchRequest struct {
-	Group   *string    `json:"group"`
-	Name    *string    `json:"song"`
-	Release *time.Time `json:"releaseDate"`
-	Text    *string    `json:"text"`
-	Link    *string    `json:"link"`
+	Group   *string `json:"group,omitempty"`
+	Name    *string `json:"song,omitempty"`
+	Release *string `json:"releaseDate,omitempty"`
+	Text    *string `json:"text,omitempty"`
+	Link    *string `json:"link,omitempty"`
 }
 
 type SongResponse struct {
-	Id      string     `json:"id"`
-	Group   string     `json:"group"`
-	Name    string     `json:"song"`
-	Release *time.Time `json:"releaseDate,omitempty"`
-	Link    string     `json:"link,omitempty"`
+	Id      string `json:"id"`
+	Group   string `json:"group"`
+	Name    string `json:"song"`
+	Release string `json:"releaseDate,omitempty"`
+	Link    string `json:"link,omitempty"`
 }
 
 type SongsResponse struct {

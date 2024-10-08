@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	musicmax "github.com/MyrzakhmetSmagul/music_max"
+	"github.com/MyrzakhmetSmagul/music_max/internal/model"
 	_ "github.com/lib/pq"
 )
 
@@ -26,7 +26,7 @@ func (s *SongRepository) BeginTx() (*sql.Tx, error) {
 	return s.db.Begin()
 }
 
-func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int) ([]musicmax.Song, error) {
+func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int) ([]model.Song, error) {
 	query := `SELECT "id", "song", "group", "release_date", COALESCE("link",'') FROM "songs"`
 	args := []interface{}{}
 	conditions := []string{}
@@ -46,7 +46,7 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	if start, ok := filters["startDate"]; ok && start != "" {
 		startDate, err := time.Parse("02.01.2006", start)
 		if err != nil {
-			err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, musicmax.ErrBadRequest)
+			err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, model.ErrBadRequest)
 			return nil, err
 		}
 		between := false
@@ -55,7 +55,7 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 			between = true
 			endDate, err = time.Parse("02.01.2006", end)
 			if err != nil {
-				err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, musicmax.ErrBadRequest)
+				err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, model.ErrBadRequest)
 				return nil, err
 			}
 		}
@@ -64,7 +64,7 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 			args = append(args, startDate, endDate)
 			counter += 2
 		} else {
-			conditions = append(conditions, fmt.Sprintf("\"release_date\" >= %d", counter))
+			conditions = append(conditions, fmt.Sprintf("\"release_date\" >= $%d", counter))
 			args = append(args, startDate)
 			counter++
 		}
@@ -72,7 +72,7 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	} else if end, ok := filters["endDate"]; ok && end != "" {
 		endDate, err := time.Parse("02.01.2006", end)
 		if err != nil {
-			err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, musicmax.ErrBadRequest)
+			err = fmt.Errorf("SongRepository.GetSongs parse time error:\n%w\n%w", err, model.ErrBadRequest)
 			return nil, err
 		}
 
@@ -93,7 +93,8 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 
 	query += fmt.Sprintf(" ORDER BY \"id\" LIMIT $%d OFFSET $%d", counter, counter+1)
 	args = append(args, limit, (page-1)*limit)
-
+	slog.Debug("SongsRepository.GetSong", slog.Any("query", query))
+	slog.Debug("SongsRepository.GetSong", slog.Any("args", args))
 	rows, err := s.db.Query(query, args...)
 	if err != nil {
 		err = fmt.Errorf("repository.GetAllSongs error during executing query: %w", err)
@@ -101,9 +102,9 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	}
 	defer rows.Close()
 
-	songs := make([]musicmax.Song, 0)
+	songs := make([]model.Song, 0)
 	for rows.Next() {
-		song := new(musicmax.Song)
+		song := new(model.Song)
 		err = rows.Scan(&song.Id, &song.Name, &song.Group, &song.Release, &song.Link)
 		if err != nil {
 			err = fmt.Errorf("repository.GetAllSongs error during scanning row: %w", err)
@@ -118,12 +119,16 @@ func (s *SongRepository) GetSongs(filters map[string]string, page int, limit int
 	return songs, nil
 }
 
-func (s *SongRepository) CreateSong(tx *sql.Tx, song *musicmax.Song) error {
+func (s *SongRepository) CreateSong(tx *sql.Tx, song *model.Song) error {
 	query := `INSERT INTO "songs"("song", "group", "release_date", "link") VALUES ($1, $2, $3, $4) RETURNING "id";`
 	res := tx.QueryRow(query, song.Name, song.Group, song.Release, song.Link)
 	err := res.Scan(&song.Id)
 	if err != nil {
-		tx.Rollback()
+		if rbErr := tx.Rollback(); rbErr != nil {
+			err = fmt.Errorf("songs.CreateSong: failed to rollback transaction after error: %v, original error: %w", rbErr, err)
+			return err
+		}
+
 		err = fmt.Errorf("songs.CreateSong postgres exec error: %w", err)
 		return err
 	}
@@ -136,7 +141,7 @@ func (s *SongRepository) DeleteSong(id string) error {
 	slog.Debug("SongRepository.DeleteSong id", slog.Any("id", id))
 	_, err := strconv.Atoi(id)
 	if err != nil {
-		err := fmt.Errorf("%w:\n%w", musicmax.ErrBadRequest, err)
+		err := fmt.Errorf("%w:\n%w", model.ErrBadRequest, err)
 		return err
 	}
 
@@ -150,11 +155,11 @@ func (s *SongRepository) DeleteSong(id string) error {
 	return nil
 }
 
-func (s *SongRepository) UpdateSong(tx *sql.Tx, song *musicmax.Song) error {
+func (s *SongRepository) UpdateSong(tx *sql.Tx, song *model.Song) error {
 	slog.Debug("SongRepository.UpdateSong id", slog.Any("id", song.Id))
 	_, err := strconv.Atoi(song.Id)
 	if err != nil {
-		err := fmt.Errorf("%w:\n%w", musicmax.ErrBadRequest, err)
+		err := fmt.Errorf("%w:\n%w", model.ErrBadRequest, err)
 		return err
 	}
 
@@ -162,13 +167,14 @@ func (s *SongRepository) UpdateSong(tx *sql.Tx, song *musicmax.Song) error {
 		strings.TrimSpace(song.Group) == "" &&
 		strings.TrimSpace(song.Link) == "" &&
 		song.Release == nil {
-		return fmt.Errorf("SongRepository.UpdateSong empty input: %w", musicmax.ErrBadRequest)
+		return fmt.Errorf("SongRepository.UpdateSong empty input: %w", model.ErrBadRequest)
 	}
 
 	args := []interface{}{}
 	conditions := []string{}
 	counter := 1
 	query := `UPDATE "songs" SET `
+
 	if strings.TrimSpace(song.Name) != "" {
 		conditions = append(conditions, fmt.Sprintf("song= $%d", counter))
 		args = append(args, strings.TrimSpace(song.Name))
@@ -186,6 +192,7 @@ func (s *SongRepository) UpdateSong(tx *sql.Tx, song *musicmax.Song) error {
 		args = append(args, strings.TrimSpace(song.Link))
 		counter++
 	}
+
 	if song.Release != nil {
 		conditions = append(conditions, fmt.Sprintf("release_date= $%d", counter))
 		args = append(args, song.Release)
@@ -198,7 +205,10 @@ func (s *SongRepository) UpdateSong(tx *sql.Tx, song *musicmax.Song) error {
 
 	_, err = tx.Exec(query, args...)
 	if err != nil {
-		tx.Rollback()
+		if rbErr := tx.Rollback(); rbErr != nil {
+			err = fmt.Errorf("songs.UpdateLyrics: failed to rollback transaction after error: %v, original error: %w", rbErr, err)
+			return err
+		}
 		err = fmt.Errorf("SongRepository.UpdateSong error executing query: %w", err)
 		return err
 	}

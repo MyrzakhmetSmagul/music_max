@@ -12,9 +12,9 @@ import (
 
 	musicmax "github.com/MyrzakhmetSmagul/music_max"
 	"github.com/MyrzakhmetSmagul/music_max/config"
-	"github.com/MyrzakhmetSmagul/music_max/pkg/handler"
-	"github.com/MyrzakhmetSmagul/music_max/pkg/repository"
-	"github.com/MyrzakhmetSmagul/music_max/pkg/service"
+	"github.com/MyrzakhmetSmagul/music_max/internal/handler"
+	"github.com/MyrzakhmetSmagul/music_max/internal/repository"
+	"github.com/MyrzakhmetSmagul/music_max/internal/service"
 )
 
 // @title Music API
@@ -46,7 +46,7 @@ func main() {
 	err := config.InitConfig("./config/.env")
 	if err != nil {
 		slog.Error("error occured during initialization of configurations:", slog.Any("error", err))
-		os.Exit(1)
+		return
 	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
@@ -60,7 +60,7 @@ func main() {
 
 	if err != nil {
 		slog.Error("error occured during opening new connection with DB:", slog.Any("error", err))
-		os.Exit(1)
+		return
 	}
 
 	repo := repository.NewRepository(db)
@@ -76,7 +76,7 @@ func main() {
 		slog.Info(fmt.Sprintf("Starting server on %s", os.Getenv("HTTP_PORT")))
 		if err := srv.Run(handler.InitRoutes()); err != nil && err != http.ErrServerClosed {
 			slog.Error("error occured during running http server:", slog.Any("error", err))
-			os.Exit(1)
+			return
 		}
 	}()
 
@@ -88,12 +88,12 @@ func main() {
 
 	if err := srv.Shutdown(ctx); err != nil {
 		slog.Error("error occured when server shutting down", slog.Any("error", err))
-		os.Exit(1)
+		return
 	}
 
 	if err := db.Close(); err != nil {
 		slog.Error("error occured when server closing db connection", slog.Any("error", err))
-		os.Exit(1)
+		return
 	}
 
 	slog.Info("Server exiting")

@@ -1,11 +1,11 @@
 basePath: /api/v1
 definitions:
-  musicmax.Description:
+  model.Description:
     properties:
       description:
         type: string
     type: object
-  musicmax.LyricsResponse:
+  model.LyricsResponse:
     properties:
       group:
         type: string
@@ -20,7 +20,7 @@ definitions:
           type: string
         type: array
     type: object
-  musicmax.SongPatchRequest:
+  model.SongPatchRequest:
     properties:
       group:
         type: string
@@ -33,14 +33,14 @@ definitions:
       text:
         type: string
     type: object
-  musicmax.SongRequest:
+  model.SongRequest:
     properties:
       group:
         type: string
       song:
         type: string
     type: object
-  musicmax.SongResponse:
+  model.SongResponse:
     properties:
       group:
         type: string
@@ -53,7 +53,7 @@ definitions:
       song:
         type: string
     type: object
-  musicmax.SongsResponse:
+  model.SongsResponse:
     properties:
       limit:
         type: integer
@@ -61,7 +61,7 @@ definitions:
         type: integer
       songs:
         items:
-          $ref: '#/definitions/musicmax.SongResponse'
+          $ref: '#/definitions/model.SongResponse'
         type: array
     type: object
 host: localhost:3030
@@ -114,15 +114,15 @@ paths:
         "200":
           description: Список песен с пагинацией и фильтрами
           schema:
-            $ref: '#/definitions/musicmax.SongsResponse'
+            $ref: '#/definitions/model.SongsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
       summary: Получить песни из библиотеки
       tags:
       - Songs
@@ -134,22 +134,22 @@ paths:
         name: song
         required: true
         schema:
-          $ref: '#/definitions/musicmax.SongRequest'
+          $ref: '#/definitions/model.SongRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
       summary: Добавить песню в библиотеку
       tags:
       - Songs
@@ -168,15 +168,15 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
       summary: Удалить песню из библиотеки
       tags:
       - Songs
@@ -193,22 +193,22 @@ paths:
         name: songInfo
         required: true
         schema:
-          $ref: '#/definitions/musicmax.SongPatchRequest'
+          $ref: '#/definitions/model.SongPatchRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
       summary: Изменить данные песни
       tags:
       - Songs
@@ -227,15 +227,15 @@ paths:
         "200":
           description: Текст песни с пагинацией по куплетам
           schema:
-            $ref: '#/definitions/musicmax.LyricsResponse'
+            $ref: '#/definitions/model.LyricsResponse'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/musicmax.Description'
+            $ref: '#/definitions/model.Description'
       summary: Получить текст песни
       tags:
       - Songs

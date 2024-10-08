@@ -1,8 +1,9 @@
-package musicmax
+package model
 
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 )
 
@@ -14,11 +15,16 @@ var ErrBadRequest = errors.New("bad request")
 var ErrInternalServerError = errors.New("internal server error")
 
 func DefaultResponse(w http.ResponseWriter, statusCode int) {
-	errResp := Description{
+	resp := Description{
 		Description: http.StatusText(statusCode),
 	}
 
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(errResp)
+
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		slog.Error("failed to encode resp to JSON", slog.Any("error", err))
+		return
+	}
 }

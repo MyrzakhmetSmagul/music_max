@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	_ "github.com/MyrzakhmetSmagul/music_max/docs"
-	"github.com/MyrzakhmetSmagul/music_max/pkg/service"
+	"github.com/MyrzakhmetSmagul/music_max/internal/service"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 

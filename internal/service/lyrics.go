@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"os"
 
-	musicmax "github.com/MyrzakhmetSmagul/music_max"
+	"github.com/MyrzakhmetSmagul/music_max/internal/model"
 )
 
 type LyricsService struct {
@@ -23,7 +23,7 @@ func NewLyricsService() Lyrics {
 	}
 }
 
-func (l *LyricsService) GetLyrics(songReq *musicmax.SongRequest) (*musicmax.LyricsAPIResponse, error) {
+func (l *LyricsService) GetLyrics(songReq *model.SongRequest) (*model.LyricsAPIResponse, error) {
 	slog.Debug("LyricsService", slog.Any("address", l.address))
 
 	reqURL, err := url.Parse(l.address)
@@ -47,14 +47,14 @@ func (l *LyricsService) GetLyrics(songReq *musicmax.SongRequest) (*musicmax.Lyri
 	if resp.StatusCode != http.StatusOK {
 		switch resp.StatusCode {
 		case http.StatusBadRequest:
-			return nil, musicmax.ErrBadRequest
+			return nil, model.ErrBadRequest
 		default:
-			err := fmt.Errorf("status code: %d\nerror: %w", resp.StatusCode, musicmax.ErrInternalServerError)
+			err := fmt.Errorf("status code: %d\nerror: %w", resp.StatusCode, model.ErrInternalServerError)
 			return nil, err
 		}
 	}
 
-	response := new(musicmax.LyricsAPIResponse)
+	response := new(model.LyricsAPIResponse)
 	err = json.NewDecoder(resp.Body).Decode(response)
 	if err != nil {
 		err := fmt.Errorf("LyricsService.GetLyrics error decoding response:\n%w", err)

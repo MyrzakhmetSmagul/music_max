@@ -1,6 +1,4 @@
-package musicmax
-
-import "time"
+package model
 
 type Lyrics struct {
 	Id     string `json:"-"`
@@ -19,7 +17,7 @@ type LyricsResponse struct {
 }
 
 type LyricsAPIResponse struct {
-	Release *time.Time `json:"releaseDate"`
-	Link    string     `json:"link"`
-	Text    string     `json:"text"`
+	Release *string `json:"releaseDate"`
+	Link    string  `json:"link"`
+	Text    string  `json:"text"`
 }
